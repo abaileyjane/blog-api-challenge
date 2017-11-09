@@ -1,0 +1,20 @@
+{
+  "name": "blog-api-challenge",
+  "version": "1.0.0",
+  "description": "challenge for thinkful lesson 7",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abaileyjane/blog-api-challenge.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abaileyjane/blog-api-challenge/issues"
+  },
+  "homepage": "https://github.com/abaileyjane/blog-api-challenge#readme"
+}
