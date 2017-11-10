@@ -16,28 +16,22 @@ function StorageException(message) {
 }
 
 const BlogPosts = {
-  create: function(title, content, author, publishDate) {
+  create: function(title, content, author) {
     const post = {
       id: uuid.v4(),
       title: title,
       content: content,
       author: author,
-      publishDate: publishDate || Date.now()
     };
-    this.posts.push(post);
+    this.posts[post.id] = post;
     return post;
   },
-  get: function(id=null) {
+  get: function() {
     // if id passed in, retrieve single post,
     // otherwise send all posts.
-    if (id !== null) {
-      return this.posts.find(post => post.id === id);
-    }
-    // return posts sorted (descending) by
-    // publish date
-    return this.posts.sort(function(a, b) {
-      return b.publishDate - a.publishDate
-    });
+    
+    return Object.keys(this.posts).map(key => this.posts[keys]);
+    ;
   },
   delete: function(id) {
     const postIndex = this.posts.findIndex(
@@ -67,4 +61,4 @@ function createBlogPostsModel() {
 }
 
 
-module.exports = {BlogPosts: createBlogPostsModel()};
+module.exports = createBlogPostsModel();
