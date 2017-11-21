@@ -1,64 +1,62 @@
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-Parser');
+const mongoose = require('mongoose');
 
-const BlogPosts = require('./models');
+mongoose.Promise = global.Promise;
+
+const {PORT, DATABASE_URL} = require('./config');
+const {BlogPosts} = require('./models');
+const blogRouter = require('./blogRouter');
 
 const jsonParser = bodyParser.json();
 const app = express();
 
 app.use(morgan('common'));
+app.use('/posts', blogRouter);
+        
 
-app.get('/blog-posts', (req, res) =>{
-	res.json(BlogPosts.get());
-})
+//app.listen(process.env.PORT || 8080, () => {
+//  console.log(`Your app is listening on port ${process.env.PORT || 8080}`);
+//});                                                                                           
 
-app.post('/blog-posts', jsonParser, (req, res) => {
-	const requiredFields = ["title", "content", "author"];
-	for(let i=0; i<requiredFields.length; i++){
-		const field = requiredFields[i]
-		if(!(field in req.body)){
-			const message = `missing \`${field}\` in request`
-			console.error(message);
-			return res.status(400).send(message);
-		}
+let server;
 
-	}
+function runServer(databaseUrl=DATABASE_URL, port=PORT) {
+  return new Promise((resolve, reject) => {
+    mongoose.connect(databaseUrl, err => {
+      if (err) {
+        return reject(err);
+      }
 
-	console.log("what the hell is blogposts", BlogPosts)
-	const item = BlogPosts.create(req.body.title, req.body.content, req.body.author);
-	res.status(201).json(item);
-})
+      server = app.listen(port, () => {
+        console.log(`Your app is listening on port ${port}`);
+        resolve();
+      })
+      .on('error', err => {
+        mongoose.disconnect();
+        reject(err);
+      });
+    });
+  });
+}
 
-app.put('/blog-posts/:id', jsonParser, (req, res) => {
-	const requiredFields = ["title", "content", "author"];
-	if(req.params.id !== req.body.id){
-		console.log("request path id is not valid")
-		res.status(400);
-	}
-	for(let i=0; i<requiredFields.length; i++){
-		const field = requiredFields[i]
-		if(!(field in req.body)){
-			const message = `missing ${field} in request`
-			console.error(message);
-			return res.status(400).send(message);
-		}}
-	console.log(`updating post with id ${req.params.id}`);
-	BlogPosts.update({
-		title: req.body.title,
-		content: req.body.content,
-		id: req.params.id,
-		author: req.body.author
-	})
-	res.status(204).end();
-})
 
-app.delete('/blog-posts/:id', (req,res) =>{
-	BlogPosts.delete(req.params.id);
-	console.log(`Deleted post with id ${req.params.id}`)
-	res.status(204).end();
-})
+function closeServer() {
+	return new Promise((resolve, reject) => {
+		console.log('closing server');
+		server.close(err =>{
+			if (err) {
+				reject(err);
+				return;
+			}
+			resolve();
+		});
+	});
+}
 
-app.listen(process.env.PORT || 8080, () => {
-  console.log(`Your app is listening on port ${process.env.PORT || 8080}`);
-});
+if (require.main === module) {
+  runServer().catch(err => console.error(err));
+}; 
+
+module.exports = {app, runServer, closeServer}
