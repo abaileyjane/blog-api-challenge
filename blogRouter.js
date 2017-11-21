@@ -39,7 +39,7 @@ router.get('/', (req, res) =>{
 router.get('/:id', (req, res) =>{
 	BlogPost
 	.findById(req.params.id)
-	.then(blogpost => res.json(blogpost.apiRepr()))
+	.then(post => res.json(blogpost.apiRepr()))
 	.catch(
 			err => {
 				console.error(err);
@@ -48,7 +48,7 @@ router.get('/:id', (req, res) =>{
 
 });
 
-router.post('/', jsonParser, (req, res) => {
+router.post('/', (req, res) => {
 	const requiredFields = ["title", "content", "author"];
 	for(let i=0; i<requiredFields.length; i++){
 		const field = requiredFields[i]
@@ -67,7 +67,7 @@ router.post('/', jsonParser, (req, res) => {
 			content: req.body.content
 		})
 		.then(
-			blogpost => res.status(201).json(blogpost.apiRepr()))
+			blogPost => res.status(201).json(blogPost.apiRepr()))
 		.catch(
 			err => {
 				console.error(err);
@@ -85,7 +85,7 @@ router.put('/:id', (req,res) => {
 		console.error(message);
 		return res.status(400).json({message: message})}
 	const toUpdate = {};
-	const updatableFields = ['content','title']
+	const updatableFields = ['content','title', 'author']
 
 	updatableFields.forEach(field => {
 		if (field in req.body) {
@@ -95,7 +95,7 @@ router.put('/:id', (req,res) => {
 
 	BlogPost
 		.findByIdAndUpdate(req.params.id, {$set: toUpdate})
-		.then(blogpost => res.status(204).end())
+		.then(blogPost => res.status(204).end())
 		.catch(err => res.status(500).json({message: 'internal server error'}))
 })
 
@@ -125,7 +125,7 @@ router.put('/:id', (req,res) => {
 router.delete('/:id', (req,res) => {
 	BlogPost
 	.findByIdAndRemove(req.params.id)
-	.then(blogpost => res.status(204).end())
+	.then(blogPost => res.status(204).end())
 	.catch(err => res.status(500).json({message: 'Internal server error'}));
 })
 
